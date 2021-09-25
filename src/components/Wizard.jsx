@@ -1,40 +1,65 @@
 import React from "react";
 
-const Wizard = ({ children }) => {
-  const [activePage, setActivePage] = React.useState(0);
-  const pages = React.Children.toArray(children);
-  const currentPage = pages[activePage];
+const WizardContext = React.createContext();
 
-  const onPrevClick = () => {
-    setActivePage((index) => index - 1);
+const Wizard = ({ children, steps }) => {
+  const [activePageIndex, setActivePageIndex] = React.useState(0);
+
+  const goPrevPage = () => {
+    setActivePageIndex((index) => index - 1);
   };
 
-  const onNextClick = () => {
-    setActivePage((index) => index + 1);
+  const goNextPage = () => {
+    setActivePageIndex((index) => index + 1);
+  };
+
+  const context = {
+    activePageIndex,
+    goPrevPage,
+    goNextPage,
+    steps,
   };
 
   return (
-    <div className="wizard">
-      <div className="wizard__content">{currentPage}</div>
-
-      <div className="wizard__buttons">
-        <button onClick={onPrevClick} disabled={activePage <= 0}>
-          Previous
-        </button>
-
-        <button
-          onClick={onNextClick}
-          disabled={activePage === pages.length - 1}
-        >
-          Next
-        </button>
-      </div>
-    </div>
+    <WizardContext.Provider value={context}>
+      <div className="wizard">{children}</div>
+    </WizardContext.Provider>
   );
 };
 
-const Page1 = () => <h1>Page 1</h1>;
-const Page2 = () => <h1>Page 2</h1>;
-const Page3 = () => <h1>Page 3</h1>;
+const Pages = (props) => {
+  const { activePageIndex } = React.useContext(WizardContext);
+  const pages = React.Children.toArray(props.children);
+  const currentPage = pages[activePageIndex];
 
-export { Wizard, Page1, Page2, Page3 };
+  return <div {...props}>{currentPage}</div>;
+};
+
+const ButtonPrev = (props) => {
+  const { activePageIndex, goPrevPage } = React.useContext(WizardContext);
+  return (
+    <button {...props} onClick={goPrevPage} disabled={activePageIndex <= 0}>
+      Previous
+    </button>
+  );
+};
+
+const ButtonNext = (props) => {
+  const { activePageIndex, goNextPage, steps } =
+    React.useContext(WizardContext);
+
+  return (
+    <button
+      {...props}
+      onClick={goNextPage}
+      disabled={activePageIndex === steps - 1}
+    >
+      Next
+    </button>
+  );
+};
+
+Wizard.ButtonPrev = ButtonPrev;
+Wizard.ButtonNext = ButtonNext;
+Wizard.Pages = Pages;
+export default Wizard;
