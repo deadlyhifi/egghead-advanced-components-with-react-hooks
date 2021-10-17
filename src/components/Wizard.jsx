@@ -12,7 +12,7 @@ const useWizard = () => {
   return context;
 };
 
-const initialState = {
+const defaultInitialState = {
   activePageIndex: 0,
   steps: 0,
 };
@@ -23,7 +23,17 @@ const reducerActions = {
   SET_STEPS: "SET_STEPS",
 };
 
-const defaultReducer = (state, action) => {
+const combineReducer =
+  (...reducer) =>
+  (state, action) => {
+    return reducer.reduce((acc, nextReducer) => {
+      return nextReducer(acc, action);
+    }, state);
+  };
+
+const defaultReducer = (state, action) => state;
+
+const wizardReducer = (state, action) => {
   const { activePageIndex } = state;
   switch (action.type) {
     case reducerActions.GO_PREV_PAGE:
@@ -37,10 +47,10 @@ const defaultReducer = (state, action) => {
   }
 };
 
-const Wizard = ({ children }) => {
+const Wizard = ({ children, reducer = defaultReducer, initialState = {} }) => {
   const [{ activePageIndex, steps }, dispatch] = React.useReducer(
-    defaultReducer,
-    initialState
+    combineReducer(wizardReducer, reducer),
+    { ...defaultInitialState, ...initialState }
   );
 
   const goPrevPage = () => {
@@ -112,4 +122,5 @@ const ButtonNext = (props) => {
 Wizard.ButtonPrev = ButtonPrev;
 Wizard.ButtonNext = ButtonNext;
 Wizard.Pages = Pages;
+Wizard.reducerActions = reducerActions;
 export default Wizard;
