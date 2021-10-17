@@ -12,8 +12,9 @@ const useWizard = () => {
   return context;
 };
 
-const Wizard = ({ children, steps }) => {
+const Wizard = ({ children }) => {
   const [activePageIndex, setActivePageIndex] = React.useState(0);
+  const [steps, setSteps] = React.useState(0);
 
   const goPrevPage = () => {
     setActivePageIndex((index) => index - 1);
@@ -28,6 +29,7 @@ const Wizard = ({ children, steps }) => {
     goPrevPage,
     goNextPage,
     steps,
+    setSteps,
   };
 
   return (
@@ -38,9 +40,14 @@ const Wizard = ({ children, steps }) => {
 };
 
 const Pages = (props) => {
-  const { activePageIndex } = useWizard();
+  const { activePageIndex, setSteps } = useWizard();
   const pages = React.Children.toArray(props.children);
+  const steps = React.Children.count(props.children);
   const currentPage = pages[activePageIndex];
+
+  React.useEffect(() => {
+    setSteps(steps);
+  }, [steps, setSteps]);
 
   return <div {...props}>{currentPage}</div>;
 };
