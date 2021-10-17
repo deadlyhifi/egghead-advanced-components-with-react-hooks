@@ -2,6 +2,16 @@ import React from "react";
 
 const WizardContext = React.createContext();
 
+const useWizard = () => {
+  const context = React.useContext(WizardContext);
+
+  if (!context) {
+    throw new Error("Components must be rendered within Wizard");
+  }
+
+  return context;
+};
+
 const Wizard = ({ children, steps }) => {
   const [activePageIndex, setActivePageIndex] = React.useState(0);
 
@@ -28,7 +38,7 @@ const Wizard = ({ children, steps }) => {
 };
 
 const Pages = (props) => {
-  const { activePageIndex } = React.useContext(WizardContext);
+  const { activePageIndex } = useWizard();
   const pages = React.Children.toArray(props.children);
   const currentPage = pages[activePageIndex];
 
@@ -36,7 +46,7 @@ const Pages = (props) => {
 };
 
 const ButtonPrev = (props) => {
-  const { activePageIndex, goPrevPage } = React.useContext(WizardContext);
+  const { activePageIndex, goPrevPage } = useWizard();
   return (
     <button {...props} onClick={goPrevPage} disabled={activePageIndex <= 0}>
       Previous
@@ -45,8 +55,7 @@ const ButtonPrev = (props) => {
 };
 
 const ButtonNext = (props) => {
-  const { activePageIndex, goNextPage, steps } =
-    React.useContext(WizardContext);
+  const { activePageIndex, goNextPage, steps } = useWizard();
 
   return (
     <button
