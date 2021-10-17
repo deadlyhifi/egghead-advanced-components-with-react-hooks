@@ -12,17 +12,51 @@ const useWizard = () => {
   return context;
 };
 
+const initialState = {
+  activePageIndex: 0,
+  steps: 0,
+};
+
+const reducerActions = {
+  GO_NEXT_PAGE: "GO_NEXT_PAGE",
+  GO_PREV_PAGE: "GO_PREV_PAGE",
+  SET_STEPS: "SET_STEPS",
+};
+
+const defaultReducer = (state, action) => {
+  const { activePageIndex } = state;
+  switch (action.type) {
+    case reducerActions.GO_PREV_PAGE:
+      return { ...state, activePageIndex: activePageIndex - 1 };
+    case reducerActions.GO_NEXT_PAGE:
+      return { ...state, activePageIndex: activePageIndex + 1 };
+    case reducerActions.SET_STEPS:
+      return { ...state, steps: action.payload };
+    default:
+      return state;
+  }
+};
+
 const Wizard = ({ children }) => {
-  const [activePageIndex, setActivePageIndex] = React.useState(0);
-  const [steps, setSteps] = React.useState(0);
+  const [{ activePageIndex, steps }, dispatch] = React.useReducer(
+    defaultReducer,
+    initialState
+  );
 
   const goPrevPage = () => {
-    setActivePageIndex((index) => index - 1);
+    dispatch({ type: reducerActions.GO_PREV_PAGE });
   };
 
   const goNextPage = () => {
-    setActivePageIndex((index) => index + 1);
+    dispatch({ type: reducerActions.GO_NEXT_PAGE });
   };
+
+  const setSteps = React.useCallback(
+    (count) => {
+      dispatch({ type: reducerActions.SET_STEPS, payload: count });
+    },
+    [dispatch]
+  );
 
   const context = {
     activePageIndex,
