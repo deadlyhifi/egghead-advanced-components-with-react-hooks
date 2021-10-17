@@ -2,7 +2,7 @@ import React from "react";
 
 const WizardContext = React.createContext();
 
-const useWizard = () => {
+const useWizardContext = () => {
   const context = React.useContext(WizardContext);
 
   if (!context) {
@@ -10,6 +10,35 @@ const useWizard = () => {
   }
 
   return context;
+};
+
+export const useWizardNavigation = () => {
+  const { goNextPage, goPrevPage, activePageIndex, steps } = useWizardContext();
+
+  return {
+    goNextPage,
+    goPrevPage,
+    currentIndex: activePageIndex + 1,
+    steps,
+  };
+};
+
+export const useWizardPages = (totalSteps) => {
+  const { setSteps, activePageIndex } = useWizardContext();
+
+  React.useEffect(() => {
+    setSteps(totalSteps);
+  }, [totalSteps, setSteps]);
+
+  return {
+    activePageIndex,
+  };
+};
+
+export const useWizardProgress = () => {
+  const { activePageIndex, steps } = useWizardContext();
+
+  return { currentIndex: activePageIndex + 1, steps };
 };
 
 const defaultInitialState = {
@@ -84,7 +113,7 @@ const Wizard = ({ children, reducer = defaultReducer, initialState = {} }) => {
 };
 
 const Pages = (props) => {
-  const { activePageIndex, setSteps } = useWizard();
+  const { activePageIndex, setSteps } = useWizardContext();
   const pages = React.Children.toArray(props.children);
   const steps = React.Children.count(props.children);
   const currentPage = pages[activePageIndex];
@@ -97,7 +126,7 @@ const Pages = (props) => {
 };
 
 const ButtonPrev = (props) => {
-  const { activePageIndex, goPrevPage } = useWizard();
+  const { activePageIndex, goPrevPage } = useWizardContext();
   return (
     <button {...props} onClick={goPrevPage} disabled={activePageIndex <= 0}>
       Previous
@@ -106,7 +135,7 @@ const ButtonPrev = (props) => {
 };
 
 const ButtonNext = (props) => {
-  const { activePageIndex, goNextPage, steps } = useWizard();
+  const { activePageIndex, goNextPage, steps } = useWizardContext();
 
   return (
     <button

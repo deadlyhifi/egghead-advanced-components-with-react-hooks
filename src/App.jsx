@@ -1,5 +1,39 @@
+import React from "react";
 import "./App.css";
-import Wizard from "./components/Wizard";
+import Wizard, {
+  useWizardNavigation,
+  useWizardPages,
+  useWizardProgress,
+} from "./components/Wizard";
+
+const Navigation = () => {
+  const { goNextPage, goPrevPage, currentIndex, steps } = useWizardNavigation();
+  return (
+    <div className="wizard__buttons">
+      <button onClick={goPrevPage} disabled={currentIndex <= 1}>
+        Previous
+      </button>
+      <button onClick={goNextPage} disabled={currentIndex >= steps}>
+        Next
+      </button>
+    </div>
+  );
+};
+
+const Pages = ({ children }) => {
+  const { activePageIndex } = useWizardPages(React.Children.count(children));
+  return <div>{React.Children.toArray(children)[activePageIndex]}</div>;
+};
+
+const Progress = () => {
+  const { currentIndex, steps } = useWizardProgress();
+
+  return (
+    <div>
+      {currentIndex} of {steps}
+    </div>
+  );
+};
 
 const Page1 = () => <h1>Page 1</h1>;
 const Page2 = () => <h1>Page 2</h1>;
@@ -25,16 +59,14 @@ function App() {
   return (
     <div className="App">
       <Wizard initialState={initialState} reducer={reducer}>
-        <Wizard.Pages>
+        <Progress />
+        <Pages>
           <Page1 />
           <Page2 />
           <Page3 />
           <Page4 />
-        </Wizard.Pages>
-        <div className="wizard__buttons">
-          <Wizard.ButtonPrev className="wizard__buttons-left" />
-          <Wizard.ButtonNext className="wizard__buttons-right" />
-        </div>
+        </Pages>
+        <Navigation />
       </Wizard>
     </div>
   );
